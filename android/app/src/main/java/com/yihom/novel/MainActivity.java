@@ -4,8 +4,8 @@ import com.facebook.react.ReactActivity;
 import com.react.rnspinkit.RNSpinkitPackage;
 import android.os.Bundle;
 
-import com.baidu.mobstat.StatService;
-import com.baidu.mobstat.SendStrategyEnum;
+// import com.baidu.mobstat.StatService;
+// import com.baidu.mobstat.SendStrategyEnum;
 
 public class MainActivity extends ReactActivity {
 
@@ -20,6 +20,6 @@ public class MainActivity extends ReactActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        StatService.setSendLogStrategy(this, SendStrategyEnum.APP_START, 1, false);
+        // StatService.setSendLogStrategy(this, SendStrategyEnum.APP_START, 1, false);
     }
 }

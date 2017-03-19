@@ -51,7 +51,7 @@ class Reader extends React.Component {
       navMargin: 0,
       fetching: true,
       dataSource: null,
-      fontSize: 24,
+      fontSize: 12,
       maxContentLength: 0,
     };
     this.realm = realmFactory();
@@ -101,7 +101,7 @@ class Reader extends React.Component {
             title='下一章' />
         );
       }
-      
+
       let btns = (<View style={{
         flex: 1,
         flexDirection: "row",

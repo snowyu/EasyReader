@@ -8,6 +8,7 @@ import {
   TouchableWithoutFeedback,
   PanResponder,
   RefreshControl,
+  findNodeHandle,
 } from 'react-native';
 import { Actions } from 'react-native-router-flux';
 import {
@@ -18,6 +19,7 @@ import { parseArticleContent } from '../parser';
 import { Button } from 'react-native-elements'
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
+import { UIManager } from 'NativeModules';
 
 import { updateLastRead } from '../ducks/directory';
 import parseContent from '../utils/parseContent';
@@ -152,36 +154,86 @@ class Reader extends React.Component {
   lastContentOffsetY = 0;
   handleScroll = (e: Event) => {
     if (e.nativeEvent.contentOffset.y > 100) {
-      if (this.state.maxContentLength > 0
+      this.setState({
+        navMargin: -64
+      });
 
-        &&
-        (e.nativeEvent.contentOffset.y > this.state.maxContentLength
-          || this.state.maxContentLength - e.nativeEvent.contentOffset.y < 200
-        )
-      ) {
-      } else {
-        let difference = e.nativeEvent.contentOffset.y - this.lastContentOffsetY;
-        if (difference > 0) {
-          if (this.state.navMargin > -64) {
-            let val = this.state.navMargin - difference < -64 ? -64 : this.state.navMargin - difference;
-            this.setState({
-              navMargin: val
-            });
-          }
-        } else {
-          if (this.state.navMargin != 0) {
-            let val = this.state.navMargin - difference > 0 ? 0 : this.state.navMargin - difference;
-            this.setState({
-              navMargin: val
-            });
-          }
-        }
-      }
+    }
+    else {
+      this.setState({
+        navMargin: 0
+      });
+
     }
 
+    // if (e.nativeEvent.contentOffset.y > 100) {
+    //   if (this.state.maxContentLength > 0
+
+    //     &&
+    //     (e.nativeEvent.contentOffset.y > this.state.maxContentLength
+    //       || this.state.maxContentLength - e.nativeEvent.contentOffset.y < 200
+    //     )
+    //   ) {
+    //   } else {
+    //     let difference = e.nativeEvent.contentOffset.y - this.lastContentOffsetY;
+    //     if (difference > 0) {
+    //       if (this.state.navMargin > -64) {
+    //         let val = this.state.navMargin - difference < -64 ? -64 : this.state.navMargin - difference;
+    //         this.setState({
+    //           navMargin: val
+    //         });
+    //       }
+    //     } else {
+    //       if (this.state.navMargin != 0) {
+    //         let val = this.state.navMargin - difference > 0 ? 0 : this.state.navMargin - difference;
+    //         this.setState({
+    //           navMargin: val
+    //         });
+    //       }
+    //     }
+    //   }
+    // }
+
     this.lastContentOffsetY = e.nativeEvent.contentOffset.y;
+    console.log('lastContentOffsetY:', this.lastContentOffsetY);
   }
 
+  handleContentClick = (e)=>{
+
+    if(this.state.showSetting){
+      this.setState({
+        showSetting:false
+      });
+      return ;
+    }
+    var {pageX,pageY} = e.nativeEvent;
+    var {height, width} = Dimensions.get('window');
+    // this.refs.content.measure((fx, fy, width, height, px, py) =>{})
+    // var handle = findNodeHandle(this.refs.content);
+    // UIManager.measure(handle, (x, y, width, height, pageX, pageY) => {
+    //   console.log('height', height)
+    // })
+    let offset = this.lastContentOffsetY;
+
+    if(pageY>height/3 && pageY<height*2/3
+    && pageX>width/3 && pageX<width*2/3
+    ){
+      //show/hide navbar
+      this.setState({
+        showSetting:true
+      });
+      return ;
+    }else if(pageY<height/2){
+      var t = offset-height
+      if (t < 0) t = 0;
+      this.refs.content.scrollTo({y:t, animated:false})
+      // console.log('scrollTo',t)
+    }else{
+      // console.log('pageY>=height/2')
+      this.refs.content.scrollTo({y:height+offset, animated:false})
+      // console.log('scrollTo',height+offset)
+    }
+  }
 
   render() {
     let current = this.props.directory.get(this.state.index);
@@ -211,7 +263,7 @@ class Reader extends React.Component {
           width:width+100,
         };
         //将内容分成多个数组来显示
-        content = <ListView
+        content = <ListView ref='content'
           style={{
             height: height,
             paddingTop: 10,
@@ -230,12 +282,10 @@ class Reader extends React.Component {
           dataSource={this.state.dataSource}
           renderRow={(rowData) => {
             if (typeof (rowData) == "string") {
-              return <Text style={style}>{rowData}</Text>;
+              return <TouchableWithoutFeedback onPress={this.handleContentClick}><Text style={style}>{rowData}</Text></TouchableWithoutFeedback>;
             } else {
               return rowData;
             }
-
-
           } }
           />
       }
@@ -247,6 +297,7 @@ class Reader extends React.Component {
       }];
 
       let rightBtns = [{
+        icon: "md-refresh",
         label: "刷新",
         onPress: e => {
           this.fetchContent(this.state.index, true);
@@ -254,7 +305,7 @@ class Reader extends React.Component {
       }];
       if (this.props.needShowDir) {
         rightBtns.unshift({
-          icon: "ios-list-outline",
+          icon: "md-list",
           onPress: ()=>Actions.directory({novel:this.props.novel})
         });
       }

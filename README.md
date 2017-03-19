@@ -45,5 +45,12 @@
 - ~~进入目录页面刷新列表的时候,在获取到列表前切换到另外一个目录中,会导致目录错误~~
 - ~~安卓上,目录页加载的时候,loading覆盖高度有问题~~
 
+# 注意事项
+
+* 可能需要下载`v23.0.1`的buildtool版本在AndroidStudio的SDKmanager，或者修改：
+  * `find node_modules -name build.gradle | xargs sed -i '' 's/buildToolsVersion\s+"23.0.1"/buildToolsVersion "25.0.2"/g'`
+  * `sed -i '' 's/buildToolsVersion\s+"23.0.1"/buildToolsVersion "25.0.2"/g' android/app/build.gradle`
+* adb install -r android/app/outputs/apk/app-release.apk
+
 # 声明
-本软件仅作学习用途 
+本软件仅作学习用途

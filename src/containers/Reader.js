@@ -106,7 +106,7 @@ class Reader extends React.Component {
         flex: 1,
         flexDirection: "row",
         justifyContent: 'space-between',
-        height: 80
+        height: 40
       }}>
         {btnArr}
       </View>)

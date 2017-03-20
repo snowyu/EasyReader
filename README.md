@@ -55,6 +55,7 @@
 * 本机调试:  react-native start 开启local server
 * 在模拟器中 ctrl+M 启用Live Load,以及远程调试：
   * http://localhost:8081/debugger-ui
+  * 不要启动HotLiveLoad，会Crash.
 
 # 声明
 本软件仅作学习用途

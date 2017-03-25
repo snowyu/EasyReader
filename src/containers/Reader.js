@@ -43,6 +43,8 @@ class Reader extends React.Component {
     dataSource: ListView.DataSource | null,
     fontSize: number,
     maxContentLength: number,
+    backgroundColor: string,
+    color: string,
   };
 
   constructor(props: Props) {
@@ -55,6 +57,8 @@ class Reader extends React.Component {
       dataSource: null,
       fontSize: 12,
       maxContentLength: 0,
+      backgroundColor: '#9FB2A1',
+      color: 'black',
     };
     this.realm = realmFactory();
   }
@@ -234,14 +238,81 @@ class Reader extends React.Component {
       // console.log('scrollTo',height+offset)
     }
   }
+  toggleNight = () =>{
+    if (this.night == null)
+      this.night = 0
+    else
+      this.night++;
+    if (this.night === 2) this.night = null
+    console.log('toggleNight', this.night)
+    let vState = {}
+    if (this.night === 1) {
+      //is night
+      vState.backgroundColor = 'black';
+      vState.color = 'gray';
+    } else if (this.night === 0) {
+      vState.backgroundColor = '#9FB2A1';
+      vState.color = 'black';
+    } else {
+      const vHours = (new Date()).getHours()
+      if ((vHours >= 19 && vHours <= 24) || (vHours >= 0 && vHours <= 9)) {
+        //is night
+        vState.backgroundColor = 'black';
+        vState.color = 'gray';
+      } else {
+        vState.backgroundColor = '#9FB2A1';
+        vState.color = 'black';
+      }
+    }
+    this._isMounted && this.setState(vState);
+  }
 
   render() {
     let current = this.props.directory.get(this.state.index);
     if (current) {
+      // let leftBtns = [{
+      //   icon: "ios-arrow-back",
+      //   label: "返回",
+      //   onPress: Actions.pop
+      // }];
+      let leftBtns = [];
+
+
+      let rightBtns = [{
+        icon: "md-refresh",
+        onPress: e => {
+          this.fetchContent(this.state.index, true);
+        }
+      }];
+      let nightBtn = {
+        icon: "ios-moon",
+        onPress: e => {
+          this.toggleNight();
+        }
+      }
+      if (this.night === 0) {
+        nightBtn.icon = "ios-sunny";
+      } else if (this.night == null) {
+        nightBtn.icon = "ios-partly-sunny";
+      }
+      leftBtns.unshift(nightBtn);
+
+      if (this.night == null) {
+        const vHours = (new Date()).getHours()
+        if ((vHours >= 19 && vHours <= 24) || (vHours >= 0 && vHours <= 9)) {
+          //is night
+          this.state.backgroundColor = 'black';
+          this.state.color = 'gray';
+        } else {
+          this.state.backgroundColor = '#9FB2A1';
+          this.state.color = 'black';
+        }
+      }
+
       let containerParams = {
         type:"plain",
         style:{
-            backgroundColor: '#9FB2A1'
+            backgroundColor: this.state.backgroundColor,
         }
       };
       let content;
@@ -261,6 +332,7 @@ class Reader extends React.Component {
           lineHeight: Math.ceil(this.state.fontSize * 1.35),
           fontWeight: '300',
           width:width+100,
+          color: this.state.color,
         };
         //将内容分成多个数组来显示
         content = <ListView ref='content'
@@ -290,19 +362,6 @@ class Reader extends React.Component {
           />
       }
 
-      let leftBtns = [{
-        icon: "ios-arrow-back",
-        label: "返回",
-        onPress: Actions.pop
-      }];
-
-      let rightBtns = [{
-        icon: "md-refresh",
-        label: "刷新",
-        onPress: e => {
-          this.fetchContent(this.state.index, true);
-        }
-      }];
       if (this.props.needShowDir) {
         rightBtns.unshift({
           icon: "md-list",
